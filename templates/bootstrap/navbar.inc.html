@@ -1,0 +1,31 @@
+{% load cache navigation %}
+{% load url from future %}
+
+{% cache 600 'navbar' request.path request.user.is_authenticated %}
+	{% load navigation %}
+	<div class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</a>
+				
+				{% block brand %}
+					<a class="brand" href="{% url 'home' %}">{{ SITE.name }}</a>
+				{% endblock brand %}
+				
+				<div class="nav-collapse">
+					<ul class="nav">
+						{% menu 'navbar' %}
+							<li{% if item.active %} class="active{% if item.highlight %} highlight{% endif %}"{% endif %}><a href="{{ item.url }}"{% if item.description %} title="{{ item.description }}"{% endif %}>{{ item.title }}</a></li>
+						{% endmenu %}
+						<li><a href="#doer-signup" data-toggle="modal">List your skills</a></li>
+						<li><a href="#seeker-signup" data-toggle="modal">Find a freelancer</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endcache %}

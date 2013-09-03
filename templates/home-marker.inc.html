@@ -1,0 +1,13 @@
+<strong>{{ postcode.area.name|escapejs }}</strong><br />
+{% for doer in postcode.profiles.all %}
+	{% if not forloop.forst %}<br />{% endif %}
+	@<a class="profile-link" href="{{ doer.get_absolute_url }}">{{ doer.username }}</a>
+	{% if doer.has_skills.count > 0 %}does
+		{% for skill in doer.has_skills.all %}<a href="{{ skill.get_absolute_url }}" style="color: #444;">{{ skill.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+		{% if doer.required_skills.count > 0 %}but{% endif %}
+	{% endif %}
+	
+	{% if doer.required_skills.count > 0 %}needs
+		{% for skill in doer.required_skills.all %}<a href="{{ skill.get_absolute_url }}" style="color: #444;">{{ skill.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+	{% endif %}
+{% endfor %}

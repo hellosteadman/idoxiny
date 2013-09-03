@@ -1,0 +1,25 @@
+<div class="form-inline">
+	{% if form_error %}
+		<p class="alert alert-error">{{ form_error }}</p>
+	{% endif %}
+	
+	<p>{% block intro %}{% endblock %}</p>
+	
+	<p>
+		<input class="skill span2" type="text" name="skill-1" placeholder="web design" value="{{ form_skills.0 }}" maxlength="50" />
+		<input class="skill span2" type="text" name="skill-2" placeholder="icon design" value="{{ form_skills.1 }}" maxlength="50" />
+		<input class="skill span2" type="text" name="skill-3" placeholder="copy writing" value="{{ form_skills.2 }}" maxlength="50" />
+	</p>
+	
+	<p>
+		<label>{% block area %}In or around{% endblock %}
+			<input class="span2" type="text" name="postcode" placeholder="B30 1AB" value="{{ form_postcode }}" size="10" maxlength="10" />
+		</label>
+		<small>We won&rsquo;t actually share your postcode.</small>
+	</p>
+	
+	{% csrf_token %}
+	
+	<hr />
+	{% block outro %}{% endblock %}
+</div>

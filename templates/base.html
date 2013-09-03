@@ -1,0 +1,114 @@
+{% extends 'bootstrap/base.html' %}
+{% load url from future %}
+
+{% block extra_head %}
+	<link rel="stylesheet" href="{{ MEDIA_URL }}css/style.css" />
+	<link rel="stylesheet" href="{{ MEDIA_URL }}fonts/goldengate-gothic/stylesheet.css" />
+	<script src="http://platform.twitter.com/anywhere.js?id={{ DO_TWITTER_CONSUMER_KEY }}&v=1" type="text/javascript"></script>
+{% endblock extra_head %}
+
+{% block content %}
+	<div class="page-header">
+		{% block page_header %}{% endblock %}
+	</div>
+	
+	<div class="row">
+		{% block main %}{% endblock %}
+	</div>
+{% endblock content %}
+
+{% block extra_footer %}
+	| Email <a href="mailto:idoxiny@gmail.com">idoxiny@gmail.com</a>
+	if you have any questions, or want your profile taken down.
+{% endblock extra_footer %}
+
+{% block javascript %}
+	{{ block.super }}
+	
+	<script>
+		twttr.anywhere(
+			function(T) {
+				T('a.profile-link').hovercards(
+					{
+						username: function(node) {
+							return node.innerHTML;
+						}
+					}
+				);
+			}
+		);
+		
+		$(document).ready(
+			function() {
+				var skills = [
+					{% for skill in skills %}'{{ skill.name|escapejs }}'{% if not forloop.last %}, {% endif %}{% endfor %}
+				];
+				
+				$('input.skill').typeahead(
+					{
+						source: skills
+					}
+				);
+				
+				$('#doer-signup, #seeker-signup').bind('submit',
+					function(e) {
+						e.preventDefault();
+						
+						$.ajax(
+							{
+								url: $(this).attr('action'),
+								type: $(this).attr('method'),
+								data: $(this).serialize(),
+								context: $(this).find('.modal-body'),
+								success: function(data) {
+									$(this).html(data);
+									$(this).find('input.skill').typeahead(
+										{
+											source: skills
+										}
+									);
+								}
+							}
+						);
+					}
+				);
+				
+				$('a[data-skill]').bind('click',
+					function() {
+						$($(this).attr('href')).find('input.skill').first().val(
+							$(this).attr('data-skill')
+						);
+					}
+				);
+			}
+		);
+	</script>
+	
+	<form action="{% url 'doer_signup' %}" method="post" id="doer-signup" class="modal fade">
+		<div class="modal-header">
+			<h2>List your skills</h2>
+		</div>
+		
+		<div class="modal-body">
+			{% include 'skills/do/signup.inc.html' %}
+		</div>
+			
+		<div class="modal-footer">
+			<button type="submit" id="connect" class="btn btn-primary">Connect to Twitter</button>
+		</div>
+	</form>
+	
+	<form action="{% url 'seeker_signup' %}" method="post" id="seeker-signup" class="modal fade">
+		<div class="modal-header">
+			<h2>Find a freelancer</h2>
+		</div>
+		
+		<div class="modal-body">
+			{% include 'skills/seek/signup.inc.html' %}
+		</div>
+		
+		<div class="modal-footer">
+			<button type="submit" id="connect" class="btn btn-primary">Connect to Twitter</button>
+		</div>
+	</form>
+{% endblock javascript %}

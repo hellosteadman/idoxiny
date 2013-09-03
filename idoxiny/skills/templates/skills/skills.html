@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block page_header %}
+	<h1>We&rsquo;ve got the skills <small>to pay the bills</small></h1>
+{% endblock page_header %}
+
+{% block main %}
+	<div class="span8">
+		<p class="tag-list">
+			{% for skill in cloud %}
+				<a class="tag-size-{{ skill.size }}" href="{{ skill.url }}">{{ skill.name }}</a>&nbsp;
+			{% endfor %}
+		</p>
+		
+		{% if unmet.count > 0 %}
+			<h2>Unmet skills</h2>
+			<p class="tag-list">
+				{% for skill in unmet %}
+					<a class="tag-size-{{ skill.size }}" href="{{ skill.url }}">{{ skill.name }}</a>&nbsp;
+				{% endfor %}
+			</p>
+		{% endif %}
+		
+		<hr />
+		<a class="btn btn-primary btn-large" href="#doer-signup" data-toggle="modal">I am a freelancer</a>
+		<a class="btn btn-success btn-large" href="#seeker-signup" data-toggle="modal">I need a freelancer</a>
+	</div>
+	
+	<div class="span4">
+		<script src="http://widgets.twimg.com/j/2/widget.js"></script>
+		<script>
+			new TWTR.Widget(
+				{
+					version: 2,
+					type: 'profile',
+					rpp: 4,
+					interval: 30000,
+					width: 300,
+					height: 470,
+					theme: {
+						shell: {
+							background: '#ffffff',
+							color: '#000000'
+						},
+						tweets: {
+							background: '#ffffff',
+							color: '#525252',
+							links: '#00008c'
+						}
+					},
+					features: {
+						scrollbar: false,
+						loop: false,
+						live: false,
+						behavior: 'default'
+					}
+				}
+			).render().setUser('idoxiny').start();
+		</script>
+	</div>
+{% endblock %}

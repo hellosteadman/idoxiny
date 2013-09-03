@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block page_header %}
+	<h1>{{ area.name }}</h1>
+{% endblock page_header %}
+
+{% block main %}
+	<div class="span6">
+		<div id="map" style="height: 300px;"></div>
+	</div>
+	
+	<div class="span3">
+		{% for doer in area_doers %}
+			<article class="doer well">
+				@<a class="profile-link" href="{{ doer.get_absolute_url }}">{{ doer.username }}</a>
+				does
+				{% for skill in doer.has_skills.all %}{% if not forloop.first %}{% if not forloop.last %},{% else %} and{% endif %}{% endif %}
+				<a href="{{ skill.get_absolute_url }}">{{ skill.name }}</a>{% endfor %}
+				in <a href="{{ doer.postcode.area.get_absolute_url }}">{{ doer.postcode.area.name }}</a>
+			</article>
+		{% endfor %}
+	</div>
+	
+	<div class="span3">
+		{% for seeker in area_seekers %}
+			<article class="seeker well">
+				@<a class="profile-link" href="{{ seeker.get_absolute_url }}">{{ seeker.username }}</a>
+				needs
+				{% for skill in seeker.skills_required.all %}{% if not forloop.first %}{% if not forloop.last %},{% else %} or{% endif %}{% endif %}
+				<a href="{{ skill.get_absolute_url }}">{{ skill.name }}</a>{% endfor %}
+				in <a href="{{ seeker.postcode.area.get_absolute_url }}">{{ seeker.postcode.area.name }}</a>
+			</article>
+		{% endfor %}
+	</div>
+{% endblock main %}
+
+{% block javascript %}
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script>
+		$(document).ready(
+			function() {
+				var map = new google.maps.Map(document.getElementById('map'),
+					{
+						center: new google.maps.LatLng(52.486243, -1.890401),
+						zoom: 10,
+						mapTypeId: google.maps.MapTypeId.ROADMAP
+					}
+				);
+				
+				{% for postcode in area.postcodes.all %}
+				var marker{{ postcode.pk }} = new google.maps.Marker(
+					{
+						position: new google.maps.LatLng({{ postcode.latitude }}, {{ postcode.longitude }}),
+						map: map
+					}
+				);
+				
+				var info{{ postcode.pk }} = new google.maps.InfoWindow(
+					{
+						content: '{% filter escapejs %}{% include 'home-marker.inc.html' %}{% endfilter %}'
+					}
+				);
+				
+				google.maps.event.addListener(marker{{ postcode.pk }}, 'click',
+					function() {
+						info{{ postcode.pk }}.open(map, marker{{ postcode.pk }});
+					}
+				);
+				
+				{% endfor %}
+			}
+		);
+	</script>
+{% endblock javascript %}

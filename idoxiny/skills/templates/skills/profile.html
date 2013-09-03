@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class="vcard">
+		<div class="page-header">
+			<h1>
+				@<span class="fn">{{ profile.username }}</span>
+				<small>
+					{% if profile.has_skills.count > 0 %}Doer {% if profile.required_skills.count > 0 %} and seeker{% endif %}{% else %}{% if profile.required_skills.count > 0 %}Seeker{% endif %}{% endif %}
+				</small>
+			</h1>
+		</div>
+		
+		<div class="row">
+			<div class="span6">
+				<div id="map" style="height: 150px;"></div>
+				
+				<h3>
+					I&rsquo;m looking for
+					{% if profile.has_skills.count > 0 %}
+						work
+						{% if profile.required_skills.count > 0 %}and{% endif %}
+					{% endif %}
+					{% if profile.required_skills.count > 0 %}freelancers{% endif %}
+					
+					through {{ SITE.name }}.
+				</h3>
+				
+				<p>
+					If you can
+					{% if profile.required_skills.count > 0 %}
+						help,
+					{% else %}
+						use my skills,
+					{% endif %}
+					
+					<a href="http://twitter.com/{{ profile.username }}">follow me on Twitter</a>
+					{% if profile.url %}or visit <a href="{{ profile.url }}">my website</a>.{% endif %}
+				</p>
+			</div>
+			
+			<div class="span6">
+				<h2>{% spaceless %}
+					<span class="title">{% if profile.has_skills.count > 0 %}
+						I do
+						{% for skill in profile.has_skills.all %}{% if not forloop.first %}{% if not forloop.last %},{% else %} and{% endif %}{% endif %}
+						<a href="{{ skill.get_absolute_url }}">{{ skill.name }}</a>{% endfor %}
+					{% endif %}
+					
+					{% if profile.required_skills.count > 0 %}
+						{% if profile.has_skills.count > 0 %} but I also need{% else %}I need{% endif %}
+						{% for skill in profile.required_skills.all %}{% if not forloop.first %}{% if not forloop.last %},{% else %} or{% endif %}{% endif %}
+						<a href="{{ skill.get_absolute_url }}">{{ skill.name }}</a>{% endfor %}
+					{% endif %}</span>
+					
+					<small><br />in and around <a href="{{ profile.postcode.area.get_absolute_url }}"><span class="adr"><span class="locality">{{ profile.postcode.area }}</span></span></a></small>
+				{% endspaceless %}</h2>
+				
+				{% if profile.description %}
+					<hr />
+					<img class="pull-left photo" style="margin-right: 10px;" src="http://twitter.com/api/users/profile_image/{{ profile.username }}" width="48" height="48" />
+					<blockquote style="min-height: 48px;">
+						{{ profile.description|linebreaks|urlize }}
+					</blockquote>
+				{% endif %}
+			</div>
+			
+			{% for seeker in matching_seekers %}
+				<article class="seeker">
+					@<a class="profile-link" href="{{ seeker.get_absolute_url }}">{{ seeker.username }}</a>
+					is looking for
+					{% for seeker_skill in seeker.skills.all %}{% if not forloop.first %}{% if not forloop.last %},{% else %} and{% endif %}{% endif %}
+					{% if not seeker_skill in profile.skills.all %}<a href="{{ seeker_skill.get_absolute_url }}">{{ seeker_skill.name }}</a>{% else %}<strong>{{ seeker_skill.name }}</strong>{% endif %}{% endfor %}
+					in <a href="{{ seeker.postcode.area.get_absolute_url }}">{{ seeker.postcode.area.name }}</a>
+				</article>
+			{% endfor %}
+		</div>
+	</div>
+{% endblock content %}
+
+{% block javascript %}
+	{{ block.super }}
+	
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script>
+		$(document).ready(
+			function() {
+				var map = new google.maps.Map(document.getElementById('map'),
+					{
+						center: new google.maps.LatLng(52.486243, -1.890401),
+						zoom: 7,
+						mapTypeId: google.maps.MapTypeId.ROADMAP
+					}
+				);
+				
+				var marker{{ profile.postcode.pk }} = new google.maps.Marker(
+					{
+						position: new google.maps.LatLng({{ profile.postcode.latitude }}, {{ profile.postcode.longitude }}),
+						map: map,
+						title: '{{ profile.postcode.area.name|escapejs }}'
+					}
+				);
+			}
+		);
+	</script>
+{% endblock javascript %}

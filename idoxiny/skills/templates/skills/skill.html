@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block page_header %}
+	<h1>{{ skill.name }}</h1>
+{% endblock page_header %}
+
+{% block main %}
+	<div class="span6">
+		<div id="map" style="height: 300px;"></div>
+	</div>
+	
+	<div class="span6">
+		<div class="row">
+			<div class="span3">
+				<h2>Looking for work</h2>
+				
+				{% for doer in skill.doers.all %}
+					<article class="doer well">
+						@<a class="profile-link" href="{{ doer.get_absolute_url }}">{{ doer.username }}</a>
+						does
+						{% for doer_skill in doer.has_skills.all %}{% if not forloop.first %}{% if not forloop.last %},{% else %} and{% endif %}{% endif %}
+						{% ifnotequal skill.pk doer_skill.pk %}<a href="{{ doer_skill.get_absolute_url }}">{{ doer_skill.name }}</a>{% else %}<strong>{{ doer_skill.name }}</strong>{% endifnotequal %}{% endfor %}
+						in <a href="{{ doer.postcode.area.get_absolute_url }}">{{ doer.postcode.area.name }}</a>
+					</article>
+				{% endfor %}
+			</div>
+			
+			<div class="span3">
+				<h2>Need freelancers</h2>
+				
+				{% for seeker in skill.seekers.all %}
+					<article class="seeker well">
+						@<a class="profile-link" href="{{ seeker.get_absolute_url }}">{{ seeker.username }}</a>
+						needs
+						{% for seeker_skill in seeker.required_skills.all %}{% if not forloop.first %}{% if not forloop.last %},{% else %} or{% endif %}{% endif %}
+						{% ifnotequal skill.pk seeker_skill.pk %}<a href="{{ seeker_skill.get_absolute_url }}">{{ seeker_skill.name }}</a>{% else %}<strong>{{ seeker_skill.name }}</strong>{% endifnotequal %}{% endfor %}
+						in <a href="{{ seeker.postcode.area.get_absolute_url }}">{{ seeker.postcode.area.name }}</a>
+					</article>
+				{% endfor %}
+			</div>
+		</div>
+		
+		<hr />
+		
+		<div class="row">
+			<div class="span3">
+				<a class="btn btn-primary btn-large" href="#doer-signup" data-skill="{{ skill.name }}" data-toggle="modal">I am a freelancer</a>
+			</div>
+			
+			<div class="span3">
+				<a class="btn btn-success btn-large" href="#seeker-signup" data-skill="{{ skill.name }}" data-toggle="modal">I need a freelancer</a>
+			</div>
+		</div>
+	</div>
+{% endblock main %}
+
+{% block javascript %}
+	{{ block.super }}
+	
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script>
+		$(document).ready(
+			function() {
+				var map = new google.maps.Map(document.getElementById('map'),
+					{
+						center: new google.maps.LatLng(52.486243, -1.890401),
+						zoom: 7,
+						mapTypeId: google.maps.MapTypeId.ROADMAP
+					}
+				);
+				
+				{% for postcode in skill_postcodes %}
+				var marker{{ postcode.pk }} = new google.maps.Marker(
+					{
+						position: new google.maps.LatLng({{ postcode.latitude }}, {{ postcode.longitude }}),
+						map: map,
+						title: '{{ postcode.area.name|escapejs }}',
+						animation: google.maps.Animation.DROP
+					}
+				);
+				
+				var info{{ postcode.pk }} = new google.maps.InfoWindow(
+					{
+						content: '{% filter escapejs %}{% include 'home-marker.inc.html' %}{% endfilter %}'
+					}
+				);
+				
+				google.maps.event.addListener(marker{{ postcode.pk }}, 'click',
+					function() {
+						info{{ postcode.pk }}.open(map, marker{{ postcode.pk }});
+					}
+				);
+				
+				{% endfor %}
+			}
+		);
+	</script>
+{% endblock javascript %}

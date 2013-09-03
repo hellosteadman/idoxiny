@@ -1,0 +1,6 @@
+._*
+*.pyc
+logs/*
+static/*
+idoxiny/settings_local.py
+/idoxiny.tmproj
