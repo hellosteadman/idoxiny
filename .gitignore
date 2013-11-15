@@ -4,3 +4,4 @@ logs/*
 static/*
 idoxiny/settings_local.py
 /idoxiny.tmproj
+/newrelic.ini
