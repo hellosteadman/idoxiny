@@ -1,3 +1,9 @@
+try:
+	import newrelic.agent
+	newrelic.agent.initialize('newrelic.ini')
+except ImportError:
+	pass
+
 import os, sys
 import django.core.handlers.wsgi
 
