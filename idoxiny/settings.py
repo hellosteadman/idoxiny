@@ -79,7 +79,7 @@ INSTALLED_APPS = (
 	'south',
 	'bambu.navigation',
 	'bambu.analytics',
-	'bambu.bootstrap',
+	'bambu.bootstrap.v2',
 	'bambu.enqueue',
 	'idoxiny.skills',
 	'idoxiny.geo'
